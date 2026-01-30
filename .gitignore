@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Expo Router
+expo-env.d.ts
+
+# Native
+ios/
+android/
+
+# EAS
+*.local.json
+*.pem
+
+# Metro
+.metro-health-check*
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Certificates
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*

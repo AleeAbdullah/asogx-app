@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "axogx-app",
+    "slug": "axogx-app",
+    "version": "1.0.0",
+    "scheme": "axogx-app",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "@react-native-community/datetimepicker"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    },
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.axogx.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.axogx.app"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c8d60154-a488-48a6-8b10-821bd959eea1"
+      }
+    }
+  }
+}
