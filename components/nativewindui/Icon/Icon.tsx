@@ -8,6 +8,7 @@ import {
 import type { IconProps } from './types';
 
 import { useColorScheme } from '@/lib/useColorScheme';
+import { COLORS } from '@/constants/colors';
 
 function Icon({
   name,
@@ -17,8 +18,8 @@ function Icon({
   size = 24,
   ...props
 }: IconProps) {
-  const { colors } = useColorScheme();
-  const defaultColor = colors.foreground;
+  const { colorScheme } = useColorScheme();
+  const defaultColor = colorScheme === 'dark' ? COLORS.dark.foreground : COLORS.light.foreground;
 
   if (materialCommunityIcon) {
     return (

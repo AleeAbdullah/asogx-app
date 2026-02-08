@@ -42,6 +42,12 @@ module.exports = {
           DEFAULT: withOpacity('card'),
           foreground: withOpacity('card-foreground'),
         },
+        // Home Page Design Colors
+        navy: withOpacity('navy'),
+        'gray-text': withOpacity('gray-text'),
+        yellow: withOpacity('yellow'),
+        'red-accent': withOpacity('red-accent'),
+        'light-bg': withOpacity('light-bg'),
       },
       borderWidth: {
         hairline: hairlineWidth(),

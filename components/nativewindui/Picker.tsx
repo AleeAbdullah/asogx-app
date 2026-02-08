@@ -3,6 +3,7 @@ import { View } from 'react-native';
 
 import { cn } from '@/lib/cn';
 import { useColorScheme } from '@/lib/useColorScheme';
+import { COLORS } from '@/constants/colors';
 
 export function Picker<T>({
   mode = 'dropdown',
@@ -12,7 +13,10 @@ export function Picker<T>({
   className,
   ...props
 }: React.ComponentProps<typeof RNPicker<T>>) {
-  const { colors } = useColorScheme();
+  const { colorScheme } = useColorScheme();
+  const backgroundColor = colorScheme === 'dark' ? COLORS.dark.background : COLORS.light.background;
+  const foregroundColor = colorScheme === 'dark' ? COLORS.dark.foreground : COLORS.light.foreground;
+
   return (
     <View
       className={cn(
@@ -23,16 +27,15 @@ export function Picker<T>({
         mode={mode}
         style={
           style ?? {
-            backgroundColor: colors.root,
+            backgroundColor,
             borderRadius: 8,
           }
         }
-        dropdownIconColor={dropdownIconColor ?? colors.foreground}
-        dropdownIconRippleColor={dropdownIconRippleColor ?? colors.foreground}
+        dropdownIconColor={dropdownIconColor ?? foregroundColor}
+        dropdownIconRippleColor={dropdownIconRippleColor ?? foregroundColor}
         {...props}
       />
     </View>
   );
 }
-
 export const PickerItem = RNPicker.Item;

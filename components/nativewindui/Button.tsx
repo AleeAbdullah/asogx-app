@@ -70,16 +70,16 @@ const buttonTextVariants = cva('font-medium', {
 
 const ANDROID_RIPPLE = {
   dark: {
-    primary: { color: withOpacity(COLORS.dark.grey3, 0.4), borderless: false },
-    secondary: { color: withOpacity(COLORS.dark.grey5, 0.8), borderless: false },
-    plain: { color: withOpacity(COLORS.dark.grey5, 0.8), borderless: false },
-    tonal: { color: withOpacity(COLORS.dark.grey5, 0.8), borderless: false },
+    primary: { color: withOpacity(COLORS.grey3, 0.4), borderless: false },
+    secondary: { color: withOpacity(COLORS.grey5, 0.8), borderless: false },
+    plain: { color: withOpacity(COLORS.grey5, 0.8), borderless: false },
+    tonal: { color: withOpacity(COLORS.grey5, 0.8), borderless: false },
   },
   light: {
-    primary: { color: withOpacity(COLORS.light.grey4, 0.4), borderless: false },
-    secondary: { color: withOpacity(COLORS.light.grey5, 0.4), borderless: false },
-    plain: { color: withOpacity(COLORS.light.grey5, 0.4), borderless: false },
-    tonal: { color: withOpacity(COLORS.light.grey6, 0.4), borderless: false },
+    primary: { color: withOpacity(COLORS.grey4, 0.4), borderless: false },
+    secondary: { color: withOpacity(COLORS.grey5, 0.4), borderless: false },
+    plain: { color: withOpacity(COLORS.grey5, 0.4), borderless: false },
+    tonal: { color: withOpacity(COLORS.grey6, 0.4), borderless: false },
   },
 };
 

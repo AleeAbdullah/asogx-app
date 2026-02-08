@@ -1,7 +1,10 @@
 import { useColorScheme as useNativewindColorScheme } from 'nativewind';
 
-import { COLORS } from '@/theme/colors';
-
+/**
+ * Color Scheme Hook
+ * Use this to toggle theme and check current color scheme
+ * Colors are automatically applied via CSS variables - no need to manually select colors
+ */
 function useColorScheme() {
   const { colorScheme, setColorScheme } = useNativewindColorScheme();
 
@@ -14,7 +17,6 @@ function useColorScheme() {
     isDarkColorScheme: colorScheme === 'dark',
     setColorScheme,
     toggleColorScheme,
-    colors: COLORS[colorScheme ?? 'light'],
   };
 }
 

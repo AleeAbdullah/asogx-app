@@ -4,16 +4,18 @@ import { Linking, Platform, View } from 'react-native';
 import { Icon } from '@/components/nativewindui/Icon';
 import { Text } from '@/components/nativewindui/Text';
 import { useColorScheme } from '@/lib/useColorScheme';
+import { COLORS } from '@/constants/colors';
 
 export default function ModalScreen() {
-  const { colors, colorScheme } = useColorScheme();
+  const { colorScheme } = useColorScheme();
+
   return (
     <>
       <StatusBar
         style={Platform.OS === 'ios' ? 'light' : colorScheme === 'dark' ? 'light' : 'dark'}
       />
       <View className="pb-safe flex-1 items-center justify-center gap-1 px-12">
-        <Icon name="doc.badge.plus" size={42} color={colors.grey} />
+        <Icon name="doc.badge.plus" size={42} color={COLORS.grey} />
         <Text variant="title3" className="pb-1 text-center font-semibold">
           NativewindUI
         </Text>

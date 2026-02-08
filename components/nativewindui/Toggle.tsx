@@ -1,15 +1,15 @@
 import { Switch } from 'react-native';
-
 import { useColorScheme } from '@/lib/useColorScheme';
-import { COLORS } from '@/theme/colors';
+import { COLORS } from '@/constants/colors';
 
 function Toggle(props: React.ComponentProps<typeof Switch>) {
-  const { colors } = useColorScheme();
+  const { colorScheme } = useColorScheme();
+
   return (
     <Switch
       trackColor={{
-        true: colors.primary,
-        false: colors.grey,
+        true: COLORS.primary,
+        false: colorScheme === 'dark' ? COLORS.grey : COLORS.grey,
       }}
       thumbColor={COLORS.white}
       {...props}

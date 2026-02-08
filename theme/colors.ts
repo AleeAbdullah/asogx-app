@@ -1,123 +1,72 @@
-import { Platform } from 'react-native';
+/**
+ * Color System
+ * These colors automatically adapt to light/dark mode via CSS variables in global.css
+ * Never calculate colors based on theme in component files - use these directly
+ * NativeWind's dark: classes will automatically apply the correct theme
+ */
 
-const IOS_SYSTEM_COLORS = {
+// These match the CSS variables defined in global.css
+// They automatically switch between light/dark based on the color scheme
+export const COLORS = {
+  // Base colors
   white: 'rgb(255, 255, 255)',
   black: 'rgb(0, 0, 0)',
-  light: {
-    grey6: 'rgb(242, 242, 247)',
-    grey5: 'rgb(230, 230, 235)',
-    grey4: 'rgb(210, 210, 215)',
-    grey3: 'rgb(199, 199, 204)',
-    grey2: 'rgb(175, 176, 180)',
-    grey: 'rgb(142, 142, 147)',
-    background: 'rgb(242, 242, 247)',
-    foreground: 'rgb(0, 0, 0)',
-    root: 'rgb(255, 255, 255)',
-    card: 'rgb(255, 255, 255)',
-    cardForeground: 'rgb(8, 28, 30)',
-    popover: 'rgb(230, 230, 235)',
-    popoverForeground: 'rgb(0, 0, 0)',
-    destructive: 'rgb(255, 56, 43)',
-    primary: 'rgb(0, 123, 254)',
-    primaryForeground: 'rgb(255, 255, 255)',
-    secondary: 'rgb(45, 175, 231)',
-    secondaryForeground: 'rgb(255, 255, 255)',
-    muted: 'rgb(175, 176, 180)',
-    mutedForeground: 'rgb(142, 142, 147)',
-    accent: 'rgb(255, 40, 84)',
-    accentForeground: 'rgb(255, 255, 255)',
-    border: 'rgb(230, 230, 235)',
-    input: 'rgb(210, 210, 215)',
-    ring: 'rgb(230, 230, 235)',
-  },
-  dark: {
-    grey6: 'rgb(21, 21, 24)',
-    grey5: 'rgb(40, 40, 42)',
-    grey4: 'rgb(55, 55, 57)',
-    grey3: 'rgb(70, 70, 73)',
-    grey2: 'rgb(99, 99, 102)',
-    grey: 'rgb(142, 142, 147)',
-    background: 'rgb(0, 0, 0)',
-    foreground: 'rgb(255, 255, 255)',
-    root: 'rgb(0, 0, 0)',
-    card: 'rgb(28, 28, 30)',
-    cardForeground: 'rgb(255, 255, 255)',
-    popover: 'rgb(40, 40, 42)',
-    popoverForeground: 'rgb(255, 255, 255)',
-    destructive: 'rgb(254, 67, 54)',
-    primary: 'rgb(3, 133, 255)',
-    primaryForeground: 'rgb(255, 255, 255)',
-    secondary: 'rgb(100, 211, 254)',
-    secondaryForeground: 'rgb(255, 255, 255)',
-    muted: 'rgb(70, 70, 73)',
-    mutedForeground: 'rgb(142, 142, 147)',
-    accent: 'rgb(255, 52, 95)',
-    accentForeground: 'rgb(255, 255, 255)',
-    border: 'rgb(40, 40, 42)',
-    input: 'rgb(55, 55, 57)',
-    ring: 'rgb(40, 40, 42)',
-  },
+
+  // Grays (iOS system colors, adjust if needed)
+  grey6: 'rgb(242, 242, 247)',
+  grey5: 'rgb(230, 230, 235)',
+  grey4: 'rgb(210, 210, 215)',
+  grey3: 'rgb(199, 199, 204)',
+  grey2: 'rgb(175, 176, 180)',
+  grey: 'rgb(142, 142, 147)',
+
+  // Theme colors - these reference CSS variables that auto-switch on theme change
+  background: 'hsl(var(--background))',
+  foreground: 'hsl(var(--foreground))',
+
+  card: 'hsl(var(--card))',
+  cardForeground: 'hsl(var(--card-foreground))',
+
+  popover: 'hsl(var(--popover))',
+  popoverForeground: 'hsl(var(--popover-foreground))',
+
+  primary: 'hsl(var(--primary))',
+  primaryForeground: 'hsl(var(--primary-foreground))',
+
+  secondary: 'hsl(var(--secondary))',
+  secondaryForeground: 'hsl(var(--secondary-foreground))',
+
+  muted: 'hsl(var(--muted))',
+  mutedForeground: 'hsl(var(--muted-foreground))',
+
+  accent: 'hsl(var(--accent))',
+  accentForeground: 'hsl(var(--accent-foreground))',
+
+  destructive: 'hsl(var(--destructive))',
+  destructiveForeground: 'hsl(var(--destructive-foreground))',
+
+  border: 'hsl(var(--border))',
+  input: 'hsl(var(--input))',
+  ring: 'hsl(var(--ring))',
+
+  // Additional theme-aware colors
+  success: 'hsl(var(--success))',
+  successForeground: 'hsl(var(--success-foreground))',
+
+  sale: 'hsl(var(--sale))',
+  saleForeground: 'hsl(var(--sale-foreground))',
+
+  // Navigation colors
+  headerBg: 'hsl(var(--header-bg))',
+  nav: 'hsl(var(--nav-bg))',
+  navForeground: 'hsl(var(--nav-foreground))',
+  topbarBg: 'hsl(var(--topbar-bg))',
+  topbarForeground: 'hsl(var(--topbar-foreground))',
+
+  // Additional colors
+  orange: 'hsl(var(--orange))',
+  orangeForeground: 'hsl(var(--orange-foreground))',
+
+  teal: 'hsl(var(--teal))',
+  tealForeground: 'hsl(var(--teal-foreground))',
 } as const;
-
-const ANDROID_COLORS = {
-  white: 'rgb(255, 255, 255)',
-  black: 'rgb(0, 0, 0)',
-  light: {
-    grey6: 'rgb(249, 249, 255)',
-    grey5: 'rgb(215, 217, 228)',
-    grey4: 'rgb(193, 198, 215)',
-    grey3: 'rgb(113, 119, 134)',
-    grey2: 'rgb(65, 71, 84)',
-    grey: 'rgb(24, 28, 35)',
-    background: 'rgb(249, 249, 255)',
-    foreground: 'rgb(0, 0, 0)',
-    root: 'rgb(255, 255, 255)',
-    card: 'rgb(255, 255, 255)',
-    cardForeground: 'rgb(24, 28, 35)',
-    popover: 'rgb(215, 217, 228)',
-    popoverForeground: 'rgb(0, 0, 0)',
-    destructive: 'rgb(186, 26, 26)',
-    primary: 'rgb(0, 112, 233)',
-    primaryForeground: 'rgb(255, 255, 255)',
-    secondary: 'rgb(176, 201, 255)',
-    secondaryForeground: 'rgb(20, 55, 108)',
-    muted: 'rgb(193, 198, 215)',
-    mutedForeground: 'rgb(65, 71, 84)',
-    accent: 'rgb(169, 73, 204)',
-    accentForeground: 'rgb(255, 255, 255)',
-    border: 'rgb(215, 217, 228)',
-    input: 'rgb(210, 210, 215)',
-    ring: 'rgb(215, 217, 228)',
-  },
-  dark: {
-    grey6: 'rgb(16, 19, 27)',
-    grey5: 'rgb(39, 42, 50)',
-    grey4: 'rgb(49, 53, 61)',
-    grey3: 'rgb(54, 57, 66)',
-    grey2: 'rgb(139, 144, 160)',
-    grey: 'rgb(193, 198, 215)',
-    background: 'rgb(0, 0, 0)',
-    foreground: 'rgb(255, 255, 255)',
-    root: 'rgb(0, 0, 0)',
-    card: 'rgb(16, 19, 27)',
-    cardForeground: 'rgb(224, 226, 237)',
-    popover: 'rgb(39, 42, 50)',
-    popoverForeground: 'rgb(224, 226, 237)',
-    destructive: 'rgb(147, 0, 10)',
-    primary: 'rgb(3, 133, 255)',
-    primaryForeground: 'rgb(255, 255, 255)',
-    secondary: 'rgb(28, 60, 114)',
-    secondaryForeground: 'rgb(189, 209, 255)',
-    muted: 'rgb(216, 226, 255)',
-    mutedForeground: 'rgb(139, 144, 160)',
-    accent: 'rgb(83, 0, 111)',
-    accentForeground: 'rgb(238, 177, 255)',
-    border: 'rgb(39, 42, 50)',
-    input: 'rgb(55, 55, 57)',
-    ring: 'rgb(39, 42, 50)',
-  },
-} as const;
-
-const COLORS = Platform.OS === 'ios' ? IOS_SYSTEM_COLORS : ANDROID_COLORS;
-
-export { COLORS };

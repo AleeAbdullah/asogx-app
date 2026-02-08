@@ -3,6 +3,7 @@ import { SymbolView } from 'expo-symbols';
 import type { IconProps } from './types';
 
 import { useColorScheme } from '@/lib/useColorScheme';
+import { COLORS } from '@/constants/colors';
 
 function Icon({
   materialCommunityIcon: _materialCommunityIcon,
@@ -13,11 +14,13 @@ function Icon({
   size = 24,
   ...props
 }: IconProps) {
-  const { colors } = useColorScheme();
+  const { colorScheme } = useColorScheme();
+  const defaultColor = colorScheme === 'dark' ? COLORS.dark.foreground : COLORS.light.foreground;
+
   return (
     <SymbolView
       name={name ?? 'questionmark'}
-      tintColor={rgbaToHex(color ?? colors.foreground)}
+      tintColor={rgbaToHex(color ?? defaultColor)}
       size={size}
       resizeMode="scaleAspectFit"
       {...props}
@@ -25,7 +28,6 @@ function Icon({
     />
   );
 }
-
 export { Icon };
 
 // TODO: seems like the need to convert rgba to hex color is a bug in expo-symbols, accordion to the docs, it should accept a hex color, but it doesn't.
