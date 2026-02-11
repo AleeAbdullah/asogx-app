@@ -3,6 +3,7 @@
  * API functions for hero cards (homepage carousel) endpoints
  */
 
+import { PaginatedResponse } from '@/constants';
 import { apiClient } from '../api';
 import { ROUTES } from '../routes';
 import type { HeroCard } from './hero-cards.types';
@@ -11,7 +12,8 @@ import type { HeroCard } from './hero-cards.types';
  * Get all active hero cards for homepage carousel
  */
 export async function getHeroCards(): Promise<HeroCard[]> {
-  return apiClient.get<HeroCard[]>(ROUTES.HERO_CARDS.LIST);
+  const response = await apiClient.get<PaginatedResponse<HeroCard>>(ROUTES.HERO_CARDS.LIST);
+  return response.results;
 }
 
 /**

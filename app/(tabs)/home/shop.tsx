@@ -17,41 +17,75 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { apiClient } from '@/dal';
+import { StatusBar } from 'expo-status-bar';
+import {
+  getProducts,
+  getFeaturedProducts,
+  getDeals,
+  getCategories,
+  type Product,
+  type PaginatedProductsResponse,
+  type ProductQueryParams,
+  type Category,
+} from '@/dal';
 import { COLORS } from '@/constants/colors';
 import { CategoryBar, type CategoryNode } from '@/components/shop/CategoryBar';
 import { FilterDrawer, type FilterState, type SortOption } from '@/components/shop/FilterDrawer';
 import { useToast } from '@/components/ui/Toast';
+import { cn } from '@/lib/cn';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - 48) / 2;
 
-// Product shape from the list API
+// Use Product type from DAL, but create a simpler interface for list view
 interface ListProduct {
   id: number;
   name: string;
   name_ar: string | null;
-  image: string;
-  price: number;
-  original_price: number | null;
+  price: string; // Price comes as string from API
+  discounted_price: string | null;
   discount_percentage: number | null;
   primary_category: {
     name: string;
     slug: string;
     full_path?: string;
   } | null;
-  filter_summary?: Record<string, string>;
   stock_quantity: number;
+  is_active: boolean;
+  images: { image: string; is_primary: boolean }[];
+  image?: string;
+  original_price?: number;
   in_stock: boolean;
-  free_shipping: boolean;
-  fast_delivery: boolean;
 }
 
-interface PaginatedResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: ListProduct[];
+// Helper function to transform Product to ListProduct
+function transformToListProduct(product: Product): ListProduct {
+  const primaryImage =
+    product.images?.find((img) => img.is_primary)?.image || product.images?.[0]?.image || '';
+  const numPrice = parseFloat(product.price);
+  const numDiscountedPrice = product.discounted_price ? parseFloat(product.discounted_price) : null;
+
+  return {
+    ...product,
+    image: primaryImage,
+    price: product.price,
+    original_price: numDiscountedPrice ? numPrice : undefined,
+    discount_percentage: product.discount_percentage,
+    in_stock: product.is_active && product.stock_quantity > 0,
+  };
+}
+
+// Helper function to transform Category to CategoryNode
+function transformToCategoryNode(category: Category): CategoryNode {
+  return {
+    id: category.id,
+    name_en: category.name_en,
+    name_ar: category.name_ar || '',
+    slug: category.slug,
+    level: category.level,
+    product_count: category.product_count || 0,
+    children: category.children ? category.children.map(transformToCategoryNode) : [],
+  };
 }
 
 // Build the full category path for API filtering
@@ -70,6 +104,22 @@ function buildCategoryPath(
     }
   }
   return null;
+}
+
+// Find the category node path (breadcrumb trail) for a given slug
+function findCategoryPath(slug: string, categories: CategoryNode[]): CategoryNode[] {
+  for (const cat of categories) {
+    if (cat.slug === slug) {
+      return [cat];
+    }
+    if (cat.children && cat.children.length > 0) {
+      const childPath = findCategoryPath(slug, cat.children);
+      if (childPath.length > 0) {
+        return [cat, ...childPath];
+      }
+    }
+  }
+  return [];
 }
 
 export default function ShopScreen() {
@@ -112,10 +162,14 @@ export default function ShopScreen() {
   useEffect(() => {
     async function loadCategories() {
       try {
-        const response = await apiClient.get<any>('/products/categories/');
-        const results = response?.results || response || [];
-        if (Array.isArray(results)) {
-          setCategories(results);
+        const results = await getCategories();
+        const transformedCategories = results.map(transformToCategoryNode);
+        setCategories(transformedCategories);
+
+        // If category param exists from navigation, set up the category path
+        if (params.category && transformedCategories.length > 0) {
+          const path = findCategoryPath(params.category, transformedCategories);
+          setCategoryPath(path);
         }
       } catch (err) {
         console.log('Categories fetch failed:', err);
@@ -124,7 +178,7 @@ export default function ShopScreen() {
       }
     }
     loadCategories();
-  }, []);
+  }, [params.category]);
 
   // Fetch products when filters change
   const fetchProducts = useCallback(
@@ -139,30 +193,30 @@ export default function ShopScreen() {
 
         // Handle special filter types from home page navigation
         if (params.filter === 'featured' && pageNum === 1 && !filters.category) {
-          const result = await apiClient.get<any>('/products/featured/');
-          const data = Array.isArray(result) ? result : result.results || [];
-          setProducts(data);
-          setTotalCount(data.length);
+          const result = await getFeaturedProducts();
+          const transformedProducts = result.map(transformToListProduct);
+          setProducts(transformedProducts);
+          setTotalCount(transformedProducts.length);
           setHasMore(false);
           setLoading(false);
           return;
         }
 
         if (params.filter === 'deals' && pageNum === 1 && !filters.category) {
-          const result = await apiClient.get<any>('/products/deals/');
-          const data = Array.isArray(result) ? result : result.results || [];
-          setProducts(data);
-          setTotalCount(data.length);
+          const result = await getDeals();
+          const transformedProducts = result.map(transformToListProduct);
+          setProducts(transformedProducts);
+          setTotalCount(transformedProducts.length);
           setHasMore(false);
           setLoading(false);
           return;
         }
 
         // Build API params
-        const apiParams: Record<string, any> = {
+        const apiParams: ProductQueryParams = {
           page: pageNum,
           page_size: 20,
-          sort: filters.sort,
+          sort: filters.sort as any, // Cast to match expected sort types
         };
 
         if (filters.category) {
@@ -176,22 +230,17 @@ export default function ShopScreen() {
         }
 
         if (filters.inStockOnly) {
-          apiParams.in_stock = 'true';
+          apiParams.in_stock = 'true' as any;
         }
 
-        const response = await apiClient.get<PaginatedResponse>('/products/', apiParams);
+        const response = await getProducts(apiParams);
 
-        let filteredResults = response.results;
-
-        // Client-side filtering for free shipping (if API doesn't support it)
-        if (filters.freeShippingOnly) {
-          filteredResults = filteredResults.filter((p) => p.free_shipping);
-        }
+        let transformedResults = response.results.map(transformToListProduct);
 
         if (refresh || pageNum === 1) {
-          setProducts(filteredResults);
+          setProducts(transformedResults);
         } else {
-          setProducts((prev) => [...prev, ...filteredResults]);
+          setProducts((prev) => [...prev, ...transformedResults]);
         }
 
         setTotalCount(response.count);
@@ -250,6 +299,17 @@ export default function ShopScreen() {
   // Filter drawer handler
   const handleApplyFilters = (newFilters: FilterState) => {
     setFilters(newFilters);
+
+    // Sync category path with the selected category from drawer
+    if (newFilters.category && newFilters.category !== filters.category) {
+      // Find the category node and build the path to it
+      const path = findCategoryPath(newFilters.category, categories);
+      setCategoryPath(path);
+    } else if (!newFilters.category) {
+      // Clear category path if no category selected
+      setCategoryPath([]);
+    }
+
     setPage(1);
   };
 
@@ -283,9 +343,11 @@ export default function ShopScreen() {
 
   // Render product card
   const renderProduct = ({ item }: { item: ListProduct }) => {
-    const hasDiscount = item.original_price && item.original_price > item.price;
+    const priceNum = parseFloat(item.price);
+    const originalPrice = item.original_price;
+    const hasDiscount = originalPrice && originalPrice > priceNum;
     const discountPercent = hasDiscount
-      ? Math.round(((item.original_price! - item.price) / item.original_price!) * 100)
+      ? Math.round(((originalPrice! - priceNum) / originalPrice!) * 100)
       : 0;
 
     return (
@@ -359,31 +421,11 @@ export default function ShopScreen() {
             </Text>
 
             <View className="flex-row flex-wrap items-baseline">
-              <Text className="text-base font-bold text-primary">
-                AED {typeof item.price === 'number' ? item.price.toFixed(0) : item.price}
-              </Text>
-              {hasDiscount && item.original_price && (
+              <Text className="text-base font-bold text-primary">AED {priceNum.toFixed(0)}</Text>
+              {hasDiscount && originalPrice && (
                 <Text className="ml-1.5 text-xs text-muted-foreground line-through">
-                  AED {typeof item.original_price === 'number' ? item.original_price.toFixed(0) : item.original_price}
+                  AED {originalPrice.toFixed(0)}
                 </Text>
-              )}
-            </View>
-
-            {/* Tags */}
-            <View className="mt-2 flex-row flex-wrap gap-1">
-              {item.free_shipping && (
-                <View className="rounded-md px-1.5 py-0.5" style={{ backgroundColor: '#059669' }}>
-                  <Text className="font-semibold text-white" style={{ fontSize: 9 }}>
-                    Free Shipping
-                  </Text>
-                </View>
-              )}
-              {item.fast_delivery && (
-                <View className="rounded-md px-1.5 py-0.5" style={{ backgroundColor: '#0891B2' }}>
-                  <Text className="font-semibold text-white" style={{ fontSize: 9 }}>
-                    Fast Delivery
-                  </Text>
-                </View>
               )}
             </View>
           </View>
@@ -392,9 +434,8 @@ export default function ShopScreen() {
     );
   };
 
-  // Header with count + filter/sort controls
-  const ListHeader = () => (
-    <View className="mb-3">
+  const ListHeader = ({ className }: { className?: string }) => (
+    <View className={cn('mb-3', className)}>
       <View className="flex-row items-center justify-between">
         <View className="flex-1">
           <Text className="text-2xl font-bold text-foreground">{getTitle()}</Text>
@@ -453,7 +494,8 @@ export default function ShopScreen() {
   // Loading state
   if (loading && products.length === 0) {
     return (
-      <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
+      <SafeAreaView className="flex-1 bg-background">
+        <StatusBar style="auto" animated />
         <CategoryBar
           categories={categories}
           selectedCategory={filters.category}
@@ -474,7 +516,10 @@ export default function ShopScreen() {
   // Error state
   if (error && products.length === 0) {
     return (
-      <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
+      <SafeAreaView className="flex-1 bg-background">
+        <StatusBar style="auto" animated />
+        <ListHeader className="px-6" />
+
         <CategoryBar
           categories={categories}
           selectedCategory={filters.category}
@@ -500,7 +545,10 @@ export default function ShopScreen() {
   // Empty state
   if (!loading && products.length === 0) {
     return (
-      <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
+      <SafeAreaView className="flex-1 bg-background">
+        <StatusBar style="auto" animated />
+        <ListHeader className="px-6" />
+
         <CategoryBar
           categories={categories}
           selectedCategory={filters.category}
@@ -524,7 +572,12 @@ export default function ShopScreen() {
               className="mt-4 rounded-xl px-6 py-3"
               style={{ backgroundColor: COLORS.primary }}
               onPress={() => {
-                setFilters({ sort: 'relevance', category: null, inStockOnly: false, freeShippingOnly: false });
+                setFilters({
+                  sort: 'relevance',
+                  category: null,
+                  inStockOnly: false,
+                  freeShippingOnly: false,
+                });
                 setCategoryPath([]);
               }}>
               <Text className="font-semibold text-white">Clear All Filters</Text>
@@ -543,7 +596,11 @@ export default function ShopScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
+    <SafeAreaView className="flex-1 bg-background">
+      <StatusBar style="auto" animated />
+
+      <ListHeader className="px-6" />
+
       {/* Category Bar */}
       <CategoryBar
         categories={categories}
@@ -564,7 +621,7 @@ export default function ShopScreen() {
         columnWrapperStyle={{ justifyContent: 'space-between' }}
         contentContainerStyle={{ padding: 16 }}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={<ListHeader />}
+        ListHeaderComponent={null}
         ListFooterComponent={
           loadingMore ? (
             <View className="items-center py-6">
@@ -595,11 +652,11 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
     <View
       className="flex-row items-center rounded-full px-3 py-1.5"
       style={{ backgroundColor: `${COLORS.primary}15` }}>
-      <Text className="text-xs font-medium" style={{ color: COLORS.primary }}>
+      <Text className="text-xs font-medium" style={{ color: COLORS.white }}>
         {label}
       </Text>
       <TouchableOpacity onPress={onRemove} className="ml-1.5" hitSlop={8}>
-        <Ionicons name="close-circle" size={16} color={COLORS.primary} />
+        <Ionicons name="close-circle" size={16} color={COLORS.white} />
       </TouchableOpacity>
     </View>
   );

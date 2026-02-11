@@ -42,12 +42,21 @@ module.exports = {
           DEFAULT: withOpacity('card'),
           foreground: withOpacity('card-foreground'),
         },
-        // Home Page Design Colors
-        navy: withOpacity('navy'),
-        'gray-text': withOpacity('gray-text'),
-        yellow: withOpacity('yellow'),
-        'red-accent': withOpacity('red-accent'),
-        'light-bg': withOpacity('light-bg'),
+        navy: {
+          DEFAULT: withOpacity('navy')
+        },
+        'gray-text': {
+          DEFAULT: withOpacity('gray-text'),
+        },
+        yellow: {
+          DEFAULT: withOpacity('yellow'),
+        },
+        'red-accent': {
+          DEFAULT: withOpacity('red-accent'),
+        },
+        'light-bg': {
+          DEFAULT: withOpacity('light-bg'),
+        },
       },
       borderWidth: {
         hairline: hairlineWidth(),
@@ -61,13 +70,13 @@ function withOpacity(variableName) {
   return ({ opacityValue }) => {
     if (opacityValue !== undefined) {
       return platformSelect({
-        ios: `rgb(var(--${variableName}) / ${opacityValue})`,
-        android: `rgb(var(--android-${variableName}) / ${opacityValue})`,
+        ios: `hsl(var(--${variableName}) / ${opacityValue})`,
+        android: `hsl(var(--android-${variableName}) / ${opacityValue})`,
       });
     }
     return platformSelect({
-      ios: `rgb(var(--${variableName}))`,
-      android: `rgb(var(--android-${variableName}))`,
+      ios: `hsl(var(--${variableName}))`,
+      android: `hsl(var(--android-${variableName}))`,
     });
   };
 }

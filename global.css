@@ -7,39 +7,60 @@
     /* Blue Theme - Primary Colors */
     --primary: 220 90% 56%;
     --primary-foreground: 0 0% 100%;
+    --android-primary: 220 90% 56%;
+    --android-primary-foreground: 0 0% 100%;
 
     --secondary: 220 14% 96%;
     --secondary-foreground: 220 9% 46%;
+    --android-secondary: 220 14% 96%;
+    --android-secondary-foreground: 220 9% 46%;
 
     --accent: 220 14% 96%;
     --accent-foreground: 220 9% 46%;
+    --android-accent: 220 14% 96%;
+    --android-accent-foreground: 220 9% 46%;
 
     /* Background Colors */
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
+    --android-background: 0 0% 100%;
+    --android-foreground: 222 47% 11%;
 
     /* Card Colors */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
+    --android-card: 0 0% 100%;
+    --android-card-foreground: 222 47% 11%;
 
     /* Muted Colors */
     --muted: 220 14% 96%;
     --muted-foreground: 220 9% 46%;
+    --android-muted: 220 14% 96%;
+    --android-muted-foreground: 220 9% 46%;
 
     /* Border & Input */
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 220 90% 56%;
+    --android-border: 220 13% 91%;
+    --android-input: 220 13% 91%;
+    --android-ring: 220 90% 56%;
 
     /* Status Colors */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
+    --android-destructive: 0 84% 60%;
+    --android-destructive-foreground: 0 0% 100%;
 
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
+    --android-success: 142 71% 45%;
+    --android-success-foreground: 0 0% 100%;
 
     --sale: 0 84% 60%;
     --sale-foreground: 0 0% 100%;
+    --android-sale: 0 84% 60%;
+    --android-sale-foreground: 0 0% 100%;
 
     /* Navigation Colors */
     --header-bg: 220 90% 56%;
@@ -47,24 +68,40 @@
     --nav-foreground: 0 0% 100%;
     --topbar-bg: 220 14% 96%;
     --topbar-foreground: 220 9% 46%;
+    --android-header-bg: 220 90% 56%;
+    --android-nav-bg: 220 90% 56%;
+    --android-nav-foreground: 0 0% 100%;
+    --android-topbar-bg: 220 14% 96%;
+    --android-topbar-foreground: 220 9% 46%;
 
     /* Additional Colors */
     --orange: 24 95% 53%;
     --orange-foreground: 0 0% 100%;
+    --android-orange: 24 95% 53%;
+    --android-orange-foreground: 0 0% 100%;
 
     --teal: 173 80% 40%;
     --teal-foreground: 0 0% 100%;
+    --android-teal: 173 80% 40%;
+    --android-teal-foreground: 0 0% 100%;
 
     /* Home Page Design Colors */
-    --navy: 220 54% 30%; /* #193364 - Main navy blue */
-    --gray-text: 220 20% 52%; /* #60708E - Text gray */
-    --yellow: 45 98% 48%; /* #F5C102 - Accent yellow */
-    --red-accent: 0 100% 63%; /* #FF4343 - Red badges */
-    --light-bg: 215 67% 97%; /* #F2F7FC - Light background */
+    --navy: 220 54% 30%; /* #193364 */
+    --gray-text: 220 20% 52%; /* #60708E */
+    --yellow: 45 98% 48%; /* #F5C102 */
+    --red-accent: 0 100% 63%; /* #FF4343 */
+    --light-bg: 215 67% 97%; /* #F2F7FC */
+    --android-navy: 220 54% 30%;
+    --android-gray-text: 220 20% 52%;
+    --android-yellow: 45 98% 48%;
+    --android-red-accent: 0 100% 63%;
+    --android-light-bg: 215 67% 97%;
 
     /* Popover */
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
+    --android-popover: 0 0% 100%;
+    --android-popover-foreground: 222 47% 11%;
 
     /* Border Radius */
     --radius: 0.5rem;
@@ -74,39 +111,60 @@
     /* Blue Theme - Dark Mode */
     --primary: 220 90% 56%;
     --primary-foreground: 0 0% 100%;
+    --android-primary: 220 90% 56%;
+    --android-primary-foreground: 0 0% 100%;
 
     --secondary: 217 33% 17%;
     --secondary-foreground: 220 9% 80%;
+    --android-secondary: 217 33% 17%;
+    --android-secondary-foreground: 220 9% 80%;
 
     --accent: 217 33% 17%;
     --accent-foreground: 220 9% 80%;
+    --android-accent: 217 33% 17%;
+    --android-accent-foreground: 220 9% 80%;
 
     /* Background Colors */
     --background: 222 47% 11%;
     --foreground: 0 0% 95%;
+    --android-background: 222 47% 11%;
+    --android-foreground: 0 0% 95%;
 
     /* Card Colors */
     --card: 222 47% 11%;
     --card-foreground: 0 0% 95%;
+    --android-card: 222 47% 11%;
+    --android-card-foreground: 0 0% 95%;
 
     /* Muted Colors */
     --muted: 217 33% 17%;
     --muted-foreground: 220 9% 80%;
+    --android-muted: 217 33% 17%;
+    --android-muted-foreground: 220 9% 80%;
 
     /* Border & Input */
     --border: 217 33% 20%;
     --input: 217 33% 20%;
     --ring: 220 90% 56%;
+    --android-border: 217 33% 20%;
+    --android-input: 217 33% 20%;
+    --android-ring: 220 90% 56%;
 
     /* Status Colors */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
+    --android-destructive: 0 84% 60%;
+    --android-destructive-foreground: 0 0% 100%;
 
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
+    --android-success: 142 71% 45%;
+    --android-success-foreground: 0 0% 100%;
 
     --sale: 0 84% 60%;
     --sale-foreground: 0 0% 100%;
+    --android-sale: 0 84% 60%;
+    --android-sale-foreground: 0 0% 100%;
 
     /* Navigation Colors */
     --header-bg: 220 90% 56%;
@@ -114,13 +172,22 @@
     --nav-foreground: 0 0% 100%;
     --topbar-bg: 217 33% 17%;
     --topbar-foreground: 220 9% 80%;
+    --android-header-bg: 220 90% 56%;
+    --android-nav-bg: 220 90% 56%;
+    --android-nav-foreground: 0 0% 100%;
+    --android-topbar-bg: 217 33% 17%;
+    --android-topbar-foreground: 220 9% 80%;
 
     /* Additional Colors */
     --orange: 24 95% 53%;
     --orange-foreground: 0 0% 100%;
+    --android-orange: 24 95% 53%;
+    --android-orange-foreground: 0 0% 100%;
 
     --teal: 173 80% 40%;
     --teal-foreground: 0 0% 100%;
+    --android-teal: 173 80% 40%;
+    --android-teal-foreground: 0 0% 100%;
 
     /* Home Page Design Colors - Dark Mode */
     --navy: 220 54% 35%;
@@ -128,14 +195,21 @@
     --yellow: 45 98% 55%;
     --red-accent: 0 100% 68%;
     --light-bg: 220 15% 15%;
+    --android-navy: 220 54% 35%;
+    --android-gray-text: 220 20% 60%;
+    --android-yellow: 45 98% 55%;
+    --android-red-accent: 0 100% 68%;
+    --android-light-bg: 220 15% 15%;
 
     /* Popover */
     --popover: 222 47% 11%;
     --popover-foreground: 0 0% 95%;
+    --android-popover: 222 47% 11%;
+    --android-popover-foreground: 0 0% 95%;
   }
 }
 
-@layer base {
+/* @layer base {
   :root {
     --background: 242 242 247;
     --foreground: 0 0 0;
@@ -221,4 +295,4 @@
       --android-ring: 39 42 50;
     }
   }
-}
+} */

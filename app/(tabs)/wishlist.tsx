@@ -1,102 +1,155 @@
 /**
  * Wishlist Page
- * Saved products with grid layout
+ * Shows the user's saved/wishlisted products from the API.
+ * Requires sign-in; shows empty state when not signed in or when list is empty.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
-import { Stack } from 'expo-router';
-import { productsApi } from '@/dal';
-import type { Product, ProductSortBy } from '@/constants/types';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, SafeAreaView, TouchableOpacity } from 'react-native';
+import { Stack, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { apiClient } from '@/dal';
+import { ROUTES } from '@/dal';
+import type { Product } from '@/constants/types';
 import { ProductGrid } from '@/components/products/ProductGrid';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { ErrorMessage } from '@/components/ui/ErrorMessage';
-import { THEME, PAGINATION } from '@/constants/config';
+import { useColorScheme } from '@/lib/useColorScheme';
+import { THEME } from '@/constants/config';
+import { COLORS } from '@/constants/colors';
+
+// API response shape for GET /cart/wishlist/
+interface WishlistProduct {
+  id: number;
+  name: string;
+  name_ar?: string;
+  image: string;
+  price: string;
+  original_price: string | null;
+  category: string;
+  discount: number | null;
+  discount_percentage: number | null;
+  free_shipping: boolean;
+  fast_delivery: boolean;
+  in_stock: boolean;
+}
+
+interface WishlistResponse {
+  id: number;
+  user: number;
+  products: WishlistProduct[];
+  created_at: string;
+  updated_at: string;
+}
+
+function mapWishlistProductToProduct(p: WishlistProduct): Product {
+  return {
+    id: p.id,
+    name: p.name,
+    name_ar: p.name_ar ?? '',
+    image: p.image,
+    price: p.price,
+    original_price: p.original_price,
+    category: p.category,
+    discount: p.discount,
+    discount_percentage: p.discount_percentage,
+    free_shipping: p.free_shipping,
+    fast_delivery: p.fast_delivery,
+    in_stock: p.in_stock,
+  };
+}
 
 export default function WishlistPage() {
+  const router = useRouter();
+  const { colorScheme } = useColorScheme();
+  const iconColor = colorScheme === 'dark' ? COLORS.dark.foreground : COLORS.grey;
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [sortBy, setSortBy] = useState<ProductSortBy>('relevance');
+  const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
 
-  const fetchProducts = useCallback(
-    async (pageNum: number, refresh: boolean = false) => {
-      try {
-        if (refresh) {
-          setRefreshing(true);
-          setError(null);
-        } else if (pageNum === 1) {
-          setLoading(true);
-          setError(null);
-        }
+  const fetchWishlist = useCallback(async (showRefreshing = false) => {
+    try {
+      if (showRefreshing) setRefreshing(true);
+      else setLoading(true);
 
-        const response = await productsApi.getProducts({
-          page: pageNum,
-          page_size: PAGINATION.DEFAULT_PAGE_SIZE,
-          sort: sortBy,
-        });
-
-        if (refresh || pageNum === 1) {
-          setProducts(response.results);
-        } else {
-          setProducts((prev) => [...prev, ...response.results]);
-        }
-
-        setHasMore(response.next !== null);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to load products';
-        setError(message);
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    },
-    [sortBy]
-  );
+      const data = await apiClient.get<WishlistResponse>(ROUTES.WISHLIST.GET);
+      const list = data?.products ?? [];
+      setProducts(list.map(mapWishlistProductToProduct));
+      setIsSignedIn(true);
+    } catch (err) {
+      // 401 or any error: treat as not signed in, show empty wishlist with sign-in prompt
+      setProducts([]);
+      setIsSignedIn(false);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
-    fetchProducts(1);
-  }, [fetchProducts]);
+    fetchWishlist();
+  }, [fetchWishlist]);
 
-  const handleRefresh = () => {
-    setPage(1);
-    fetchProducts(1, true);
-  };
+  const handleRefresh = () => fetchWishlist(true);
 
-  const handleLoadMore = () => {
-    if (!loading && hasMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      fetchProducts(nextPage);
-    }
-  };
-
-  const handleSortChange = (newSort: ProductSortBy) => {
-    setSortBy(newSort);
-    setPage(1);
-  };
-
-  if (loading && page === 1) {
+  if (loading && !refreshing && products.length === 0) {
     return (
       <>
-        <Stack.Screen options={{ title: 'Products' }} />
-        <SafeAreaView className="flex-1" style={{ backgroundColor: THEME.COLORS.background }}>
+        <Stack.Screen options={{ title: 'Wishlist' }} />
+        <SafeAreaView className="flex-1 bg-background">
           <LoadingSpinner fullScreen />
         </SafeAreaView>
       </>
     );
   }
 
-  if (error && products.length === 0) {
+  // Not signed in: show empty state with sign-in prompt
+  if (isSignedIn === false && products.length === 0) {
     return (
       <>
-        <Stack.Screen options={{ title: 'Products' }} />
-        <SafeAreaView className="flex-1" style={{ backgroundColor: THEME.COLORS.background }}>
-          <ErrorMessage message={error} onRetry={() => fetchProducts(1)} fullScreen />
+        <Stack.Screen options={{ title: 'Wishlist' }} />
+        <SafeAreaView className="flex-1 bg-background">
+          <View className="flex-1 items-center justify-center px-8">
+            <Ionicons name="heart-outline" size={64} color={iconColor} />
+            <Text className="mt-4 text-center text-xl font-semibold text-foreground">
+              Sign in to view your wishlist
+            </Text>
+            <Text className="mt-2 text-center text-base text-muted-foreground">
+              Save items you like and see them here.
+            </Text>
+            <TouchableOpacity
+              className="mt-6 rounded-xl bg-primary px-6 py-3"
+              onPress={() => router.push('/(tabs)/profile')}
+              activeOpacity={0.7}>
+              <Text className="font-semibold text-primary-foreground">Go to Profile</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </>
+    );
+  }
+
+  // Signed in but empty wishlist
+  if (isSignedIn && products.length === 0) {
+    return (
+      <>
+        <Stack.Screen options={{ title: 'Wishlist' }} />
+        <SafeAreaView className="flex-1 bg-background">
+          <View className="flex-1 items-center justify-center px-8">
+            <Ionicons name="heart-outline" size={64} color={iconColor} />
+            <Text className="mt-4 text-center text-xl font-semibold text-foreground">
+              Your wishlist is empty
+            </Text>
+            <Text className="mt-2 text-center text-base text-muted-foreground">
+              Tap the heart on any product to add it here.
+            </Text>
+            <TouchableOpacity
+              className="mt-6 rounded-xl bg-primary px-6 py-3"
+              onPress={() => router.push('/(tabs)/shop')}
+              activeOpacity={0.7}>
+              <Text className="font-semibold text-primary-foreground">Browse products</Text>
+            </TouchableOpacity>
+          </View>
         </SafeAreaView>
       </>
     );
@@ -104,96 +157,22 @@ export default function WishlistPage() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Products' }} />
-      <SafeAreaView className="flex-1" style={{ backgroundColor: THEME.COLORS.background }}>
+      <Stack.Screen options={{ title: 'Wishlist' }} />
+      <SafeAreaView className="flex-1 bg-background">
         <ProductGrid
           products={products}
-          onEndReached={handleLoadMore}
           refreshing={refreshing}
           onRefresh={handleRefresh}
           ListHeaderComponent={
             <View className="mb-4">
-              <Text
-                className="mb-4 font-bold"
-                style={{
-                  fontSize: THEME.FONT_SIZES['2xl'],
-                  color: THEME.COLORS.foreground,
-                }}>
-                All Products
+              <Text className="text-2xl font-bold text-foreground">Wishlist</Text>
+              <Text className="mt-1 text-sm text-muted-foreground">
+                {products.length} item{products.length !== 1 ? 's' : ''} saved
               </Text>
-              <View className="mb-2">
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: THEME.SPACING.xs }}>
-                  <SortButton
-                    label="Relevance"
-                    value="relevance"
-                    active={sortBy === 'relevance'}
-                    onPress={() => handleSortChange('relevance')}
-                  />
-                  <SortButton
-                    label="Price: Low to High"
-                    value="price_asc"
-                    active={sortBy === 'price_asc'}
-                    onPress={() => handleSortChange('price_asc')}
-                  />
-                  <SortButton
-                    label="Price: High to Low"
-                    value="price_desc"
-                    active={sortBy === 'price_desc'}
-                    onPress={() => handleSortChange('price_desc')}
-                  />
-                  <SortButton
-                    label="Newest"
-                    value="newest"
-                    active={sortBy === 'newest'}
-                    onPress={() => handleSortChange('newest')}
-                  />
-                  <SortButton
-                    label="Best Selling"
-                    value="best_selling"
-                    active={sortBy === 'best_selling'}
-                    onPress={() => handleSortChange('best_selling')}
-                  />
-                </ScrollView>
-              </View>
             </View>
           }
-          ListFooterComponent={loading && page > 1 ? <LoadingSpinner /> : undefined}
         />
       </SafeAreaView>
     </>
-  );
-}
-
-interface SortButtonProps {
-  label: string;
-  value: ProductSortBy;
-  active: boolean;
-  onPress: () => void;
-}
-
-function SortButton({ label, active, onPress }: SortButtonProps) {
-  return (
-    <TouchableOpacity
-      className="px-4 py-2"
-      style={{
-        borderRadius: THEME.BORDER_RADIUS.md,
-        backgroundColor: active ? THEME.COLORS.primary : THEME.COLORS.secondary,
-        borderWidth: 1,
-        borderColor: active ? THEME.COLORS.primary : THEME.COLORS.border,
-      }}
-      onPress={onPress}
-      activeOpacity={0.7}>
-      <Text
-        style={{
-          fontSize: THEME.FONT_SIZES.sm,
-          color: active ? THEME.COLORS.primaryForeground : THEME.COLORS.secondaryForeground,
-          fontWeight: active ? '600' : '500',
-        }}>
-        {label}
-      </Text>
-    </TouchableOpacity>
   );
 }

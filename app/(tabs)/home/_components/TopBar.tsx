@@ -4,28 +4,28 @@
  */
 
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, Text, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '@/constants/colors';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface TopBarProps {
-  onMenuPress: () => void;
   onShopPress: () => void;
 }
 
-export function TopBar({ onMenuPress, onShopPress }: TopBarProps) {
-  return (
-    <View
-      className="flex-row items-center justify-between border-b border-border bg-background px-5 py-3">
-      {/* Menu Button */}
-      <TouchableOpacity onPress={onMenuPress} activeOpacity={0.7} className="p-2">
-        <Ionicons name="menu-outline" size={24} color={COLORS.navy} />
-      </TouchableOpacity>
+export function TopBar({ onShopPress }: TopBarProps) {
+  const insets = useSafeAreaInsets();
 
-      {/* Shop / Browse Button */}
-      <TouchableOpacity onPress={onShopPress} activeOpacity={0.7} className="p-2">
-        <Ionicons name="storefront-outline" size={24} color={COLORS.navy} />
-      </TouchableOpacity>
+  return (
+    <View className="absolute z-10 w-full bg-primary" style={{ paddingTop: insets.top }}>
+      <View className="py- flex-row items-center justify-between px-5 pb-2">
+        {/* App Title */}
+        <Text className="text-xl font-bold text-primary-foreground">Lybia Store</Text>
+        {/* Shop / Browse Button */}
+        <TouchableOpacity onPress={onShopPress} activeOpacity={0.7} className="p-2">
+          <Ionicons name="storefront-outline" size={24} color="#ffffff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

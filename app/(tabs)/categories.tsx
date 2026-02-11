@@ -199,11 +199,7 @@ export default function CategoriesScreen() {
           {/* Product Image */}
           <View style={{ width: '100%', height: CARD_WIDTH }}>
             {item.image ? (
-              <Image
-                source={{ uri: item.image }}
-                className="h-full w-full"
-                resizeMode="cover"
-              />
+              <Image source={{ uri: item.image }} className="h-full w-full" resizeMode="cover" />
             ) : (
               <View className="h-full w-full items-center justify-center bg-muted">
                 <Ionicons name="image-outline" size={40} color={COLORS.grey} />
@@ -213,9 +209,7 @@ export default function CategoriesScreen() {
               <View
                 className="absolute bg-red-500 px-2 py-1"
                 style={{ top: 8, right: 8, borderRadius: 4 }}>
-                <Text className="text-xs font-bold text-white">
-                  -{item.discount_percentage}%
-                </Text>
+                <Text className="text-xs font-bold text-white">-{item.discount_percentage}%</Text>
               </View>
             )}
             {!item.in_stock && (
@@ -229,14 +223,15 @@ export default function CategoriesScreen() {
 
           {/* Product Info */}
           <View className="p-2">
-            <Text className="mb-1 text-sm text-foreground" numberOfLines={2} style={{ minHeight: 36 }}>
+            <Text
+              className="mb-1 text-sm text-foreground"
+              numberOfLines={2}
+              style={{ minHeight: 36 }}>
               {item.name}
             </Text>
 
             <View className="mb-1 flex-row flex-wrap items-center">
-              <Text className="mr-1 text-base font-bold text-primary">
-                AED {item.price}
-              </Text>
+              <Text className="mr-1 text-base font-bold text-primary">AED {item.price}</Text>
               {hasDiscount && item.original_price && (
                 <Text className="text-sm text-muted-foreground line-through">
                   AED {item.original_price}
@@ -288,7 +283,7 @@ export default function CategoriesScreen() {
               className="rounded-lg border px-4 py-2"
               style={{
                 backgroundColor: sortBy === option.value ? COLORS.primary : 'transparent',
-                borderColor: sortBy === option.value ? COLORS.primary : COLORS.grey3,
+                borderColor: sortBy === option.value ? COLORS.primary : COLORS.grey,
               }}
               onPress={() => handleSortChange(option.value)}
               activeOpacity={0.7}>

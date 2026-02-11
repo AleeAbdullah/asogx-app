@@ -20,7 +20,8 @@ import type { Product } from '@/constants/types';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { ProductGrid } from '@/components/products/ProductGrid';
-import { THEME } from '@/constants/config';
+import { useColorScheme } from '@/lib/useColorScheme';
+import { COLORS } from '@/constants/colors';
 import { useToast } from '@/components/ui/Toast';
 
 const { width } = Dimensions.get('window');
@@ -29,6 +30,8 @@ export default function ProductDetailPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const toast = useToast();
+  const { colorScheme } = useColorScheme();
+  const mutedIconColor = colorScheme === 'dark' ? COLORS.dark.foreground : COLORS.grey;
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +78,7 @@ export default function ProductDetailPage() {
             headerBackTitle: 'Back',
           }}
         />
-        <SafeAreaView className="flex-1" style={{ backgroundColor: THEME.COLORS.background }}>
+        <SafeAreaView className="flex-1 bg-background">
           <LoadingSpinner fullScreen />
         </SafeAreaView>
       </>
@@ -92,7 +95,7 @@ export default function ProductDetailPage() {
             headerBackTitle: 'Back',
           }}
         />
-        <SafeAreaView className="flex-1" style={{ backgroundColor: THEME.COLORS.background }}>
+        <SafeAreaView className="flex-1 bg-background">
           <ErrorMessage message={error || 'Product not found'} onRetry={fetchProduct} fullScreen />
         </SafeAreaView>
       </>
@@ -129,37 +132,21 @@ export default function ProductDetailPage() {
           headerBackTitle: 'Back',
         }}
       />
-      <SafeAreaView className="flex-1" style={{ backgroundColor: THEME.COLORS.background }}>
+      <SafeAreaView className="flex-1 bg-background">
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
           {/* Image Gallery */}
           <View className="relative" style={{ width: '100%', height: width }}>
             <Image source={{ uri: selectedImage }} className="h-full w-full" resizeMode="cover" />
             {hasDiscount && (
-              <View
-                className="absolute px-4 py-2"
-                style={{
-                  top: THEME.SPACING.md,
-                  right: THEME.SPACING.md,
-                  backgroundColor: THEME.COLORS.sale,
-                  borderRadius: THEME.BORDER_RADIUS.md,
-                }}>
-                <Text
-                  className="font-bold"
-                  style={{
-                    color: THEME.COLORS.saleForeground,
-                    fontSize: THEME.FONT_SIZES.lg,
-                  }}>
+              <View className="bg-sale absolute right-4 top-4 rounded-lg px-4 py-2">
+                <Text className="text-lg font-bold text-sale-foreground">
                   -{product.discount_percentage}%
                 </Text>
               </View>
             )}
             {!product.in_stock && (
-              <View
-                className="absolute inset-0 items-center justify-center"
-                style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}>
-                <Text className="font-bold text-white" style={{ fontSize: THEME.FONT_SIZES.xl }}>
-                  Out of Stock
-                </Text>
+              <View className="absolute inset-0 items-center justify-center bg-black/60">
+                <Text className="text-xl font-bold text-white">Out of Stock</Text>
               </View>
             )}
           </View>
@@ -169,78 +156,50 @@ export default function ProductDetailPage() {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              style={{ maxHeight: 80 }}
-              contentContainerStyle={{ padding: THEME.SPACING.md, gap: THEME.SPACING.sm }}>
+              className="max-h-20"
+              contentContainerStyle={{ padding: 16, gap: 12 }}>
               <TouchableOpacity onPress={() => setSelectedImage(product.image)}>
-                <Image
-                  source={{ uri: product.image }}
-                  style={{
-                    width: 60,
-                    height: 60,
-                    borderRadius: THEME.BORDER_RADIUS.sm,
-                    borderWidth: 2,
-                    borderColor:
-                      selectedImage === product.image ? THEME.COLORS.primary : THEME.COLORS.border,
-                  }}
-                />
+                <View
+                  className={`overflow-hidden rounded border-2 ${selectedImage === product.image ? 'border-primary' : 'border-border'
+                    }`}
+                  style={{ width: 60, height: 60 }}>
+                  <Image
+                    source={{ uri: product.image }}
+                    className="h-full w-full"
+                    style={{ width: 60, height: 60 }}
+                  />
+                </View>
               </TouchableOpacity>
               {product.images.map((img) => (
                 <TouchableOpacity key={img.id} onPress={() => setSelectedImage(img.image)}>
-                  <Image
-                    source={{ uri: img.image }}
-                    style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: THEME.BORDER_RADIUS.sm,
-                      borderWidth: 2,
-                      borderColor:
-                        selectedImage === img.image ? THEME.COLORS.primary : THEME.COLORS.border,
-                    }}
-                  />
+                  <View
+                    className={`overflow-hidden rounded border-2 ${selectedImage === img.image ? 'border-primary' : 'border-border'
+                      }`}
+                    style={{ width: 60, height: 60 }}>
+                    <Image
+                      source={{ uri: img.image }}
+                      className="h-full w-full"
+                      style={{ width: 60, height: 60 }}
+                    />
+                  </View>
                 </TouchableOpacity>
               ))}
             </ScrollView>
           )}
 
           {/* Product Info */}
-          <View style={{ padding: THEME.SPACING.md }}>
-            <Text
-              className="mb-2 font-bold"
-              style={{
-                fontSize: THEME.FONT_SIZES['2xl'],
-                color: THEME.COLORS.foreground,
-              }}>
-              {product.name}
-            </Text>
+          <View className="p-4">
+            <Text className="mb-2 text-2xl font-bold text-foreground">{product.name}</Text>
 
             {typeof product.category === 'string' && (
-              <Text
-                className="mb-4"
-                style={{
-                  fontSize: THEME.FONT_SIZES.md,
-                  color: THEME.COLORS.mutedForeground,
-                }}>
-                {product.category}
-              </Text>
+              <Text className="mb-4 text-base text-muted-foreground">{product.category}</Text>
             )}
 
             {/* Price */}
             <View className="mb-4 flex-row items-center">
-              <Text
-                className="mr-2 font-bold"
-                style={{
-                  fontSize: THEME.FONT_SIZES['3xl'],
-                  color: THEME.COLORS.primary,
-                }}>
-                AED {product.price}
-              </Text>
+              <Text className="mr-2 text-3xl font-bold text-primary">AED {product.price}</Text>
               {hasDiscount && product.original_price && (
-                <Text
-                  className="line-through"
-                  style={{
-                    fontSize: THEME.FONT_SIZES.lg,
-                    color: THEME.COLORS.mutedForeground,
-                  }}>
+                <Text className="text-lg text-muted-foreground line-through">
                   AED {product.original_price}
                 </Text>
               )}
@@ -249,33 +208,15 @@ export default function ProductDetailPage() {
             {/* Badges */}
             <View className="mb-4 flex-row flex-wrap gap-2">
               {product.free_shipping && (
-                <View
-                  className="flex-row items-center gap-1 px-2 py-1"
-                  style={{
-                    backgroundColor: THEME.COLORS.success,
-                    borderRadius: THEME.BORDER_RADIUS.md,
-                  }}>
+                <View className="flex-row items-center gap-1 rounded-lg bg-green-600 px-2 py-1">
                   <Ionicons name="car-outline" size={16} color="#fff" />
-                  <Text
-                    className="font-semibold text-white"
-                    style={{ fontSize: THEME.FONT_SIZES.sm }}>
-                    Free Shipping
-                  </Text>
+                  <Text className="text-sm font-semibold text-white">Free Shipping</Text>
                 </View>
               )}
               {product.fast_delivery && (
-                <View
-                  className="flex-row items-center gap-1 px-2 py-1"
-                  style={{
-                    backgroundColor: THEME.COLORS.teal,
-                    borderRadius: THEME.BORDER_RADIUS.md,
-                  }}>
+                <View className="flex-row items-center gap-1 rounded-lg bg-teal-600 px-2 py-1">
                   <Ionicons name="flash-outline" size={16} color="#fff" />
-                  <Text
-                    className="font-semibold text-white"
-                    style={{ fontSize: THEME.FONT_SIZES.sm }}>
-                    Fast Delivery
-                  </Text>
+                  <Text className="text-sm font-semibold text-white">Fast Delivery</Text>
                 </View>
               )}
             </View>
@@ -283,21 +224,10 @@ export default function ProductDetailPage() {
             {/* Stock Status */}
             {product.stock_quantity !== undefined && (
               <View className="mb-4 flex-row items-center">
+                <Text className="mr-1 text-base text-foreground">Stock:</Text>
                 <Text
-                  className="mr-1"
-                  style={{
-                    fontSize: THEME.FONT_SIZES.md,
-                    color: THEME.COLORS.foreground,
-                  }}>
-                  Stock:
-                </Text>
-                <Text
-                  className="font-semibold"
-                  style={{
-                    fontSize: THEME.FONT_SIZES.md,
-                    color:
-                      product.stock_quantity > 0 ? THEME.COLORS.success : THEME.COLORS.destructive,
-                  }}>
+                  className={`text-base font-semibold ${product.stock_quantity > 0 ? 'text-green-600' : 'text-destructive'
+                    }`}>
                   {product.stock_quantity > 0
                     ? `${product.stock_quantity} available`
                     : 'Out of stock'}
@@ -308,22 +238,8 @@ export default function ProductDetailPage() {
             {/* Description */}
             {product.description && (
               <View className="mb-6">
-                <Text
-                  className="mb-2 font-bold"
-                  style={{
-                    fontSize: THEME.FONT_SIZES.xl,
-                    color: THEME.COLORS.foreground,
-                  }}>
-                  Description
-                </Text>
-                <Text
-                  style={{
-                    fontSize: THEME.FONT_SIZES.md,
-                    color: THEME.COLORS.foreground,
-                    lineHeight: 24,
-                  }}>
-                  {product.description}
-                </Text>
+                <Text className="mb-2 text-xl font-bold text-foreground">Description</Text>
+                <Text className="text-base leading-6 text-foreground">{product.description}</Text>
               </View>
             )}
 
@@ -331,35 +247,27 @@ export default function ProductDetailPage() {
             <View className="mb-6 flex-row gap-3">
               {/* Add to Cart Button */}
               <TouchableOpacity
-                className="flex-1 flex-row items-center justify-center gap-2 py-4"
-                style={{
-                  backgroundColor: product.in_stock ? THEME.COLORS.primary : THEME.COLORS.muted,
-                  borderRadius: THEME.BORDER_RADIUS.lg,
-                }}
+                className={`flex-1 flex-row items-center justify-center gap-2 rounded-xl py-4 ${product.in_stock ? 'bg-primary' : 'bg-muted'
+                  }`}
                 onPress={handleAddToCart}
                 activeOpacity={0.7}>
                 <Ionicons name="cart-outline" size={24} color="#fff" />
-                <Text className="font-bold text-white" style={{ fontSize: THEME.FONT_SIZES.lg }}>
+                <Text className="text-lg font-bold text-primary-foreground">
                   {product.in_stock ? 'Add to Cart' : 'Out of Stock'}
                 </Text>
               </TouchableOpacity>
 
               {/* Favorite Button */}
               <TouchableOpacity
-                className="items-center justify-center py-4"
-                style={{
-                  width: 56,
-                  borderRadius: THEME.BORDER_RADIUS.lg,
-                  borderWidth: 1.5,
-                  borderColor: isFavorite ? '#EF4444' : THEME.COLORS.border,
-                  backgroundColor: isFavorite ? '#FEF2F2' : 'transparent',
-                }}
+                className={`items-center justify-center rounded-xl py-4 ${isFavorite ? 'border-2 border-red-500 bg-red-50 dark:bg-red-950/30' : 'border-2 border-border'
+                  }`}
+                style={{ width: 56 }}
                 onPress={handleFavoritePress}
                 activeOpacity={0.7}>
                 <Ionicons
                   name={isFavorite ? 'heart' : 'heart-outline'}
                   size={24}
-                  color={isFavorite ? '#EF4444' : THEME.COLORS.mutedForeground}
+                  color={isFavorite ? '#EF4444' : mutedIconColor}
                 />
               </TouchableOpacity>
             </View>
@@ -367,33 +275,16 @@ export default function ProductDetailPage() {
 
           {/* Related Products */}
           {relatedProducts.length > 0 && (
-            <View style={{ padding: THEME.SPACING.md, paddingTop: THEME.SPACING.xl }}>
-              <Text
-                className="mb-2 font-bold"
-                style={{
-                  fontSize: THEME.FONT_SIZES.xl,
-                  color: THEME.COLORS.foreground,
-                }}>
-                Related Products
-              </Text>
+            <View className="px-4 pb-4 pt-8">
+              <Text className="mb-2 text-xl font-bold text-foreground">Related Products</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: THEME.SPACING.md, paddingTop: THEME.SPACING.sm }}>
+                contentContainerStyle={{ gap: 16, paddingTop: 12 }}>
                 {relatedProducts.map((relatedProduct) => (
                   <TouchableOpacity
                     key={relatedProduct.id}
-                    className="overflow-hidden"
-                    style={{
-                      width: 150,
-                      backgroundColor: THEME.COLORS.card,
-                      borderRadius: THEME.BORDER_RADIUS.lg,
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 4,
-                      elevation: 3,
-                    }}
+                    className="w-[150px] overflow-hidden rounded-xl bg-card shadow-sm"
                     onPress={() => router.push(`/products/${relatedProduct.id}` as any)}>
                     <Image
                       source={{ uri: relatedProduct.image }}
@@ -401,21 +292,11 @@ export default function ProductDetailPage() {
                       style={{ height: 150 }}
                     />
                     <Text
-                      className="p-2"
-                      style={{
-                        fontSize: THEME.FONT_SIZES.sm,
-                        color: THEME.COLORS.foreground,
-                        minHeight: 40,
-                      }}
+                      className="min-h-10 p-2 text-sm text-foreground"
                       numberOfLines={2}>
                       {relatedProduct.name}
                     </Text>
-                    <Text
-                      className="px-2 pb-2 font-bold"
-                      style={{
-                        fontSize: THEME.FONT_SIZES.md,
-                        color: THEME.COLORS.primary,
-                      }}>
+                    <Text className="px-2 pb-2 text-base font-bold text-primary">
                       AED {relatedProduct.price}
                     </Text>
                   </TouchableOpacity>

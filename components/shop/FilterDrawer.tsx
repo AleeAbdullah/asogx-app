@@ -18,19 +18,11 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '@/constants/colors';
+import { CategoryNode } from './CategoryBar';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export type SortOption = 'relevance' | 'price_asc' | 'price_desc' | 'newest' | 'best_selling';
-
-interface CategoryNode {
-  id: number;
-  name_en: string;
-  slug: string;
-  level: number;
-  product_count: number;
-  children: CategoryNode[];
-}
 
 export interface FilterState {
   sort: SortOption;
@@ -200,8 +192,10 @@ export function FilterDrawer({
                   onPress={() => setLocalFilters((f) => ({ ...f, sort: opt.value }))}
                   className="rounded-lg border px-3 py-2"
                   style={{
-                    backgroundColor: localFilters.sort === opt.value ? COLORS.primary : 'transparent',
-                    borderColor: localFilters.sort === opt.value ? COLORS.primary : 'rgba(0,0,0,0.12)',
+                    backgroundColor:
+                      localFilters.sort === opt.value ? COLORS.primary : 'transparent',
+                    borderColor:
+                      localFilters.sort === opt.value ? COLORS.primary : 'rgba(0,0,0,0.12)',
                   }}
                   activeOpacity={0.7}>
                   <Text
@@ -225,14 +219,17 @@ export function FilterDrawer({
                 onPress={() => setLocalFilters((f) => ({ ...f, category: null }))}
                 className="mb-1 flex-row items-center rounded-lg px-3 py-2.5"
                 style={{
-                  backgroundColor: localFilters.category === null ? `${COLORS.primary}15` : 'transparent',
+                  backgroundColor:
+                    localFilters.category === null ? `${COLORS.primary}15` : 'transparent',
                 }}
                 activeOpacity={0.7}>
                 <View
                   className="mr-3 h-5 w-5 items-center justify-center rounded-full border-2"
                   style={{
-                    borderColor: localFilters.category === null ? COLORS.primary : 'rgba(0,0,0,0.2)',
-                    backgroundColor: localFilters.category === null ? COLORS.primary : 'transparent',
+                    borderColor:
+                      localFilters.category === null ? COLORS.primary : 'rgba(0,0,0,0.2)',
+                    backgroundColor:
+                      localFilters.category === null ? COLORS.primary : 'transparent',
                   }}>
                   {localFilters.category === null && (
                     <Ionicons name="checkmark" size={12} color="#fff" />
@@ -241,7 +238,7 @@ export function FilterDrawer({
                 <Text
                   className="flex-1 text-sm"
                   style={{
-                    color: localFilters.category === null ? COLORS.primary : COLORS.navy,
+                    color: localFilters.category === null ? COLORS.white : COLORS.navy,
                     fontWeight: localFilters.category === null ? '600' : '400',
                   }}>
                   All Categories
@@ -262,26 +259,6 @@ export function FilterDrawer({
               ))}
             </FilterSection>
           )}
-
-          {/* Quick Filters */}
-          <FilterSection title="Quick Filters" icon="flash-outline">
-            <ToggleFilter
-              label="In Stock Only"
-              icon="checkmark-circle-outline"
-              isActive={localFilters.inStockOnly}
-              onToggle={() =>
-                setLocalFilters((f) => ({ ...f, inStockOnly: !f.inStockOnly }))
-              }
-            />
-            <ToggleFilter
-              label="Free Shipping"
-              icon="airplane-outline"
-              isActive={localFilters.freeShippingOnly}
-              onToggle={() =>
-                setLocalFilters((f) => ({ ...f, freeShippingOnly: !f.freeShippingOnly }))
-              }
-            />
-          </FilterSection>
         </ScrollView>
 
         {/* Apply Button */}
@@ -343,14 +320,13 @@ function ToggleFilter({
         backgroundColor: isActive ? `${COLORS.primary}10` : 'transparent',
       }}
       activeOpacity={0.7}>
-      <Ionicons
-        name={icon as any}
-        size={20}
-        color={isActive ? COLORS.primary : COLORS.grayText}
-      />
+      <Ionicons name={icon as any} size={20} color={isActive ? COLORS.primary : COLORS.grayText} />
       <Text
         className="ml-3 flex-1 text-sm"
-        style={{ color: isActive ? COLORS.primary : COLORS.navy, fontWeight: isActive ? '600' : '400' }}>
+        style={{
+          color: isActive ? COLORS.primary : COLORS.navy,
+          fontWeight: isActive ? '600' : '400',
+        }}>
         {label}
       </Text>
       <View
@@ -413,7 +389,7 @@ function CategoryTreeItem({
         <Text
           className="flex-1 text-sm"
           style={{
-            color: isSelected ? COLORS.primary : COLORS.navy,
+            color: isSelected ? COLORS.white : COLORS.navy,
             fontWeight: isSelected ? '600' : '400',
           }}
           numberOfLines={1}>

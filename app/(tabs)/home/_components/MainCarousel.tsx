@@ -5,7 +5,15 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { View, Text, ScrollView, Dimensions, Image, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Dimensions,
+  Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+} from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -44,16 +52,17 @@ export function MainCarousel({ items }: MainCarouselProps) {
         onScroll={handleScroll}
         scrollEventThrottle={16}>
         {items.map((item) => (
-          <View
-            key={item.id}
-            className="items-center justify-center overflow-hidden bg-light-bg"
-            style={{ width: SCREEN_WIDTH, height: 280 }}>
+          <View key={item.id} className="w-full items-center justify-center overflow-hidden px-2">
             {/* Text overlay (only if title provided) */}
             {item.title ? (
               <View className="absolute left-5 top-16 z-10">
-                <Text className="mb-0 text-4xl font-bold leading-tight text-navy">{item.title}</Text>
+                <Text className="mb-0 text-4xl font-bold leading-tight text-navy">
+                  {item.title}
+                </Text>
                 {item.subtitle && (
-                  <Text className="text-4xl font-bold leading-tight text-navy">{item.subtitle}</Text>
+                  <Text className="text-4xl font-bold leading-tight text-navy">
+                    {item.subtitle}
+                  </Text>
                 )}
               </View>
             ) : null}
@@ -61,7 +70,8 @@ export function MainCarousel({ items }: MainCarouselProps) {
             {/* Hero Image */}
             <Image
               source={{ uri: item.image }}
-              style={{ width: SCREEN_WIDTH, height: 280 }}
+              style={{ width: SCREEN_WIDTH - 16, height: 240 }}
+              className="rounded-xl"
               resizeMode="cover"
             />
           </View>

@@ -5,7 +5,7 @@
 
 export interface Category {
   id: number;
-  name: string;
+  name_en: string;
   name_ar: string | null;
   slug: string;
   description: string | null;

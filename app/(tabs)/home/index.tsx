@@ -18,13 +18,21 @@ import { PromoBanner } from './_components/PromoBanner';
 import { FeaturedProductsSection } from './_components/FeaturedProductsSection';
 
 // Import DAL functions
-import { apiClient } from '@/dal';
-import { getFeaturedProducts, getNewArrivals, getDeals } from '@/dal';
+import {
+  getFeaturedProducts,
+  getNewArrivals,
+  getDeals,
+  getCategories,
+  getHeroCards,
+  type Category,
+} from '@/dal';
 
 // Toast notifications
 import { useToast } from '@/components/ui/Toast';
+import { type CategoryNode } from '@/components/shop/CategoryBar';
+import { HomeCategoryBar } from './_components/HomeCategoryBar';
+import { StatusBar } from 'expo-status-bar';
 
-// UI Product interface for home page components
 interface UIProduct {
   id: string;
   name: string;
@@ -37,7 +45,6 @@ interface UIProduct {
   hasSale?: boolean;
 }
 
-// Carousel item interface
 interface CarouselItem {
   id: string;
   image: string;
@@ -46,15 +53,32 @@ interface CarouselItem {
   link?: string;
 }
 
+// Helper function to transform Category to CategoryNode
+function transformToCategoryNode(category: Category): CategoryNode {
+  return {
+    id: category.id,
+    name_en: category.name_en,
+    name_ar: category.name_ar || '',
+    slug: category.slug,
+    level: category.level,
+    product_count: category.product_count || 0,
+    children: category.children ? category.children.map(transformToCategoryNode) : [],
+  };
+}
+
 // Transform any product shape from API to component format
 function transformProductToUI(product: any): UIProduct {
   const price = typeof product.price === 'number' ? product.price : parseFloat(product.price);
 
   const originalPrice = product.original_price
-    ? (typeof product.original_price === 'number' ? product.original_price : parseFloat(product.original_price))
+    ? typeof product.original_price === 'number'
+      ? product.original_price
+      : parseFloat(product.original_price)
     : null;
   const discountedPrice = product.discounted_price
-    ? (typeof product.discounted_price === 'number' ? product.discounted_price : parseFloat(product.discounted_price))
+    ? typeof product.discounted_price === 'number'
+      ? product.discounted_price
+      : parseFloat(product.discounted_price)
     : null;
 
   let displayPrice = price;
@@ -86,7 +110,11 @@ function transformProductToUI(product: any): UIProduct {
     price: displayPrice,
     originalPrice: displayOriginalPrice,
     image: imageUrl,
-    rating: product.rating ? (typeof product.rating === 'number' ? product.rating : parseFloat(product.rating)) : 0,
+    rating: product.rating
+      ? typeof product.rating === 'number'
+        ? product.rating
+        : parseFloat(product.rating)
+      : 0,
     reviewCount: product.review_count || 0,
     isFavorite: false,
     hasSale,
@@ -98,6 +126,12 @@ export default function HomePage() {
   const toast = useToast();
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Categories state
+  const [categories, setCategories] = useState<CategoryNode[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoryPath, setCategoryPath] = useState<CategoryNode[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
   // API State
   const [heroCards, setHeroCards] = useState<CarouselItem[]>([]);
   const [bestSellers, setBestSellers] = useState<UIProduct[]>([]);
@@ -105,6 +139,21 @@ export default function HomePage() {
   const [deals, setDeals] = useState<UIProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const results = await getCategories();
+        const transformedCategories = results.map(transformToCategoryNode);
+        setCategories(transformedCategories);
+      } catch (err) {
+      } finally {
+        setCategoriesLoading(false);
+      }
+    }
+    loadCategories();
+  }, []);
 
   // Fetch all data on mount
   useEffect(() => {
@@ -116,7 +165,7 @@ export default function HomePage() {
         // Fetch all data in parallel
         const [heroCardsRes, featuredData, newArrivalsData, dealsData] = await Promise.all([
           // Hero cards API returns paginated response
-          apiClient.get<any>('/hero-cards/').catch((err) => {
+          getHeroCards().catch((err) => {
             console.log('Hero cards fetch failed:', err);
             return { results: [] };
           }),
@@ -135,7 +184,7 @@ export default function HomePage() {
         ]);
 
         // Process hero cards (API returns {count, results} with image_url field)
-        const heroResults = heroCardsRes?.results || heroCardsRes || [];
+        const heroResults = heroCardsRes || [];
         if (Array.isArray(heroResults) && heroResults.length > 0) {
           setHeroCards(
             heroResults.map((card: any) => ({
@@ -175,13 +224,40 @@ export default function HomePage() {
     loadHomeData();
   }, []);
 
-  // Event handlers
-  const handleMenuPress = () => {
-    console.log('Menu pressed');
+  // Category bar handlers
+  const handleSelectCategory = (slug: string | null) => {
+    setSelectedCategory(slug);
+    // Navigate to shop with category filter
+    if (slug) {
+      router.push({ pathname: '/(tabs)/home/shop', params: { category: slug } });
+    } else {
+      router.push('/(tabs)/home/shop');
+    }
+  };
+
+  const handleDrillDown = (node: CategoryNode) => {
+    // setCategoryPath((prev) => [...prev, node]);
+    router.push({ pathname: '/(tabs)/home/shop', params: { category: node.slug } });
+  };
+
+  const handleDrillUp = () => {
+    setCategoryPath((prev) => {
+      const next = prev.slice(0, -1);
+      // Navigate to parent category or all products
+      if (next.length > 0) {
+        router.push({
+          pathname: '/(tabs)/home/shop',
+          params: { category: next[next.length - 1].slug },
+        });
+      } else {
+        router.push('/(tabs)/home/shop');
+      }
+      return next;
+    });
   };
 
   const handleShopPress = () => {
-    router.push('/(tabs)/shop');
+    router.push('/(tabs)/home/shop');
   };
 
   const handleProductPress = (id: string) => {
@@ -189,7 +265,6 @@ export default function HomePage() {
   };
 
   const handleFavoritePress = (id: string) => {
-    // TODO: Replace with real auth check
     const isSignedIn = false;
     if (!isSignedIn) {
       toast.warning('Sign in required', 'Please sign in to add items to your wishlist.');
@@ -207,20 +282,20 @@ export default function HomePage() {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      router.push({ pathname: '/(tabs)/shop', params: { search: searchQuery.trim() } });
+      router.push({ pathname: '/(tabs)/home/shop', params: { search: searchQuery.trim() } });
     }
   };
 
   const handlePromoPress = () => {
-    router.push({ pathname: '/(tabs)/shop', params: { filter: 'deals' } });
+    router.push({ pathname: '/(tabs)/home/shop', params: { filter: 'deals' } });
   };
 
   const handleViewAllBestSellers = () => {
-    router.push({ pathname: '/(tabs)/shop', params: { filter: 'best_selling' } });
+    router.push({ pathname: '/(tabs)/home/shop', params: { filter: 'best_selling' } });
   };
 
   const handleViewAllFeatured = () => {
-    router.push({ pathname: '/(tabs)/shop', params: { filter: 'featured' } });
+    router.push({ pathname: '/(tabs)/home/shop', params: { filter: 'featured' } });
   };
 
   // Show loading state
@@ -228,12 +303,14 @@ export default function HomePage() {
     return (
       <>
         <Stack.Screen options={{ headerShown: false }} />
-        <SafeAreaView className="flex-1 bg-background">
-          <TopBar
-            onMenuPress={handleMenuPress}
-            onShopPress={handleShopPress}
-          />
-          <View className="px-5 pt-3">
+        <SafeAreaView className="flex-1 bg-background pt-12">
+          <StatusBar style="light" animated />
+
+          {/* Top Bar */}
+          <TopBar onShopPress={handleShopPress} />
+
+          {/* Search Bar */}
+          <View className="bg-primary px-5 pt-3 ">
             <SearchBar
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -243,7 +320,7 @@ export default function HomePage() {
           </View>
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size="large" color="#193364" />
-            <Text className="text-gray-text mt-4">Loading products...</Text>
+            <Text className="mt-4 text-gray-text">Loading products...</Text>
           </View>
         </SafeAreaView>
       </>
@@ -253,12 +330,14 @@ export default function HomePage() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView className="flex-1 bg-background">
+      <SafeAreaView className="flex-1 bg-background pt-12">
+        <StatusBar style="light" animated />
+
         {/* Top Bar */}
-        <TopBar onMenuPress={handleMenuPress} onShopPress={handleShopPress} />
+        <TopBar onShopPress={handleShopPress} />
 
         {/* Search Bar */}
-        <View className="px-5 pt-3">
+        <View className="bg-primary px-5 pt-3 ">
           <SearchBar
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -268,9 +347,19 @@ export default function HomePage() {
         </View>
 
         {/* Main Content */}
-        <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+        <ScrollView showsVerticalScrollIndicator={false} className="flex-1 pt-2">
           {/* Hero Carousel - from backend */}
           {heroCards.length > 0 && <MainCarousel items={heroCards} />}
+
+          <HomeCategoryBar
+            categories={categories}
+            selectedCategory={selectedCategory}
+            categoryPath={categoryPath}
+            onSelectCategory={handleSelectCategory}
+            onDrillDown={handleDrillDown}
+            onDrillUp={handleDrillUp}
+            loading={categoriesLoading}
+          />
 
           {/* Best Sellers */}
           {bestSellers.length > 0 && (
@@ -307,7 +396,7 @@ export default function HomePage() {
           {/* Show error message if no products at all */}
           {error && bestSellers.length === 0 && featuredProducts.length === 0 && (
             <View className="items-center justify-center px-5 py-10">
-              <Text className="text-gray-text text-center">{error}</Text>
+              <Text className="text-center text-gray-text">{error}</Text>
             </View>
           )}
         </ScrollView>

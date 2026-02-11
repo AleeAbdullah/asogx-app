@@ -3,6 +3,7 @@
  * API functions for categories endpoints
  */
 
+import { PaginatedResponse } from '@/constants';
 import { apiClient } from '../api';
 import { ROUTES } from '../routes';
 import type { Category, CategoryWithBreadcrumbs } from './categories.types';
@@ -11,7 +12,8 @@ import type { Category, CategoryWithBreadcrumbs } from './categories.types';
  * Get all categories
  */
 export async function getCategories(): Promise<Category[]> {
-  return apiClient.get<Category[]>(ROUTES.CATEGORIES.LIST);
+  const response = await apiClient.get<PaginatedResponse<Category>>(ROUTES.CATEGORIES.LIST);
+  return response.results;
 }
 
 /**

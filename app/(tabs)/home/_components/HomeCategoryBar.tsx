@@ -1,5 +1,5 @@
 /**
- * CategoryBar Component
+ * HomeCategoryBar Component
  * Horizontal scrollable category pills with drill-down navigation
  * Shows "All" + main categories, tapping drills into subcategories
  */
@@ -8,18 +8,9 @@ import React, { useRef, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/colors';
+import { CategoryNode } from '@/components/shop/CategoryBar';
 
-export interface CategoryNode {
-  id: number;
-  name_en: string;
-  name_ar: string;
-  slug: string;
-  level: number;
-  product_count: number;
-  children: CategoryNode[];
-}
-
-interface CategoryBarProps {
+interface HomeCategoryBarProps {
   categories: CategoryNode[];
   selectedCategory: string | null;
   categoryPath: CategoryNode[];
@@ -29,7 +20,7 @@ interface CategoryBarProps {
   loading?: boolean;
 }
 
-export function CategoryBar({
+export function HomeCategoryBar({
   categories,
   selectedCategory,
   categoryPath,
@@ -37,15 +28,13 @@ export function CategoryBar({
   onDrillDown,
   onDrillUp,
   loading,
-}: CategoryBarProps) {
+}: HomeCategoryBarProps) {
   const scrollRef = useRef<ScrollView>(null);
 
-  // Reset scroll position when categories change
   useEffect(() => {
     scrollRef.current?.scrollTo({ x: 0, animated: true });
   }, [categoryPath.length]);
 
-  // Determine which items to show
   const currentParent = categoryPath.length > 0 ? categoryPath[categoryPath.length - 1] : null;
   const displayItems = currentParent ? currentParent.children : categories;
   const isDrilledDown = categoryPath.length > 0;
@@ -59,7 +48,7 @@ export function CategoryBar({
   }
 
   return (
-    <View className="border-b border-border bg-card">
+    <View className=" border-border bg-card">
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -100,6 +89,8 @@ export function CategoryBar({
         {displayItems.map((cat) => {
           const hasChildren = cat.children && cat.children.length > 0;
           const isSelected = selectedCategory === cat.slug;
+
+          console.log(cat);
 
           return (
             <CategoryPill

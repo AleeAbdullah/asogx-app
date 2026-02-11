@@ -16,23 +16,23 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-export function SearchBar({ value, onChangeText, onSearch, placeholder = 'Search shoes...' }: SearchBarProps) {
+export function SearchBar({
+  value,
+  onChangeText,
+  onSearch,
+  placeholder = 'Search shoes...',
+}: SearchBarProps) {
   const { colorScheme } = useColorScheme();
-  
+
   return (
     <View className="mb-4 flex-row items-center rounded-xl border border-border bg-card px-4 py-3">
-      <Ionicons 
-        name="search-outline" 
-        size={20} 
-        color={COLORS.grey} 
-        style={{ marginRight: 8 }}
-      />
+      <Ionicons name="search-outline" size={20} color={COLORS.grey} style={{ marginRight: 8 }} />
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={COLORS.grey}
-        className="flex-1 text-base text-foreground"
+        className="flex-1 text-base leading-5 text-foreground"
         returnKeyType="search"
         onSubmitEditing={onSearch}
       />
